@@ -37,4 +37,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       });
     return true; // keep the channel open for the async sendResponse
   }
+  if (msg && msg.type === "lireader-print-open") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("print.html") })
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: String(err) }));
+    return true;
+  }
 });

@@ -90,8 +90,10 @@
     }
     /* ---- Reading line / content ---- */
     #lireader-overlay .lr-reading-line {
-      position: fixed; top: 50vh; left: 0; right: 0;
-      border-top: 3px dashed rgba(0,0,0,.18); pointer-events: none; display: none;
+      position: fixed; top: 50vh; left: 50%; width: var(--lr-width, 70%);
+      transform: translateX(-50%);
+      border-top: 2px dashed rgba(31,111,235,.7);
+      pointer-events: none; display: none; z-index: 6;
     }
     #lireader-overlay .lr-content {
       flex: 1; overflow-y: auto; padding: 32px 24px;
@@ -99,11 +101,25 @@
       margin: 0 auto; box-sizing: border-box;
     }
     #lireader-overlay .lr-range { width: 180px; accent-color: #1f6feb; }
-    #lireader-overlay .lr-para, #lireader-overlay .lr-heading { transition: opacity .18s ease; }
+    #lireader-overlay .lr-content,
     #lireader-overlay .lr-para, #lireader-overlay .lr-heading {
-      color: #1f1f1f; -webkit-text-fill-color: #1f1f1f;
+      user-select: text !important; -webkit-user-select: text !important;
     }
-    #lireader-overlay .lr-para { font-size: var(--lr-font-size, 18px); line-height: 1.75; margin: 0 0 1.1em; }
+    #lireader-overlay .lr-para, #lireader-overlay .lr-heading,
+    #lireader-overlay .lr-figure, #lireader-overlay .lr-math { transition: color .18s ease, opacity .18s ease; }
+    #lireader-overlay .lr-para::selection, #lireader-overlay .lr-para *::selection,
+    #lireader-overlay .lr-heading::selection, #lireader-overlay .lr-heading *::selection {
+      background: #b6d4fe !important; color: #1f1f1f !important;
+      -webkit-text-fill-color: #1f1f1f !important;
+    }
+    #lireader-overlay .lr-para, #lireader-overlay .lr-heading {
+      color: #1f1f1f !important; -webkit-text-fill-color: #1f1f1f !important;
+      visibility: visible !important;
+    }
+    #lireader-overlay .lr-para {
+      font-size: var(--lr-font-size, 18px) !important; line-height: 1.75 !important;
+      margin: 0 0 1.1em; display: block !important;
+    }
     #lireader-overlay .lr-heading {
       font-size: calc(var(--lr-font-size, 18px) * 1.35); line-height: 1.3;
       margin: 1.5em 0 .6em; font-family: var(--lr-family, Georgia, serif);
@@ -125,8 +141,19 @@
       color: #3b6fc0; text-decoration: underline dotted rgba(59,111,192,.45);
     }
     #lireader-overlay .lr-figure { margin: 1.2em 0; text-align: center; }
-    #lireader-overlay .lr-figure img { max-width: 100%; height: auto; border-radius: 4px; }
-    #lireader-overlay .lr-figcaption { font: 13px/1.5 system-ui, sans-serif; color: #666; margin-top: 6px; }
+    #lireader-overlay img {
+      max-width: 100% !important; height: auto !important;
+      visibility: visible !important; opacity: 1 !important;
+      position: static !important; transform: none !important; filter: none !important;
+    }
+    #lireader-overlay .lr-figure img, #lireader-overlay .lr-para img {
+      display: block !important; width: auto !important; margin: 0.45em auto !important;
+      border-radius: 4px; background: #fff;
+    }
+    #lireader-overlay .lr-figcaption {
+      font: 13px/1.5 system-ui, sans-serif; color: #555 !important;
+      -webkit-text-fill-color: #555 !important; margin-top: 6px; text-align: left;
+    }
     #lireader-overlay .lr-math { margin: 0.8em 0; }
     #lireader-overlay .lr-math-display { text-align: center; overflow-x: auto; }
     #lireader-overlay .lr-math math { font-size: 1.05em; }
@@ -153,10 +180,24 @@
       text-decoration: none;
     }
     #lireader-overlay .lr-outline a:hover { text-decoration: underline; }
-    /* ---- Spotlight states ---- */
-    #lireader-overlay .lr-focus { opacity: 1; }
-    #lireader-overlay .lr-near  { opacity: .55; }
-    #lireader-overlay .lr-dim   { opacity: .15; }
+    /* ---- Spotlight states ----
+       Text is dimmed with color, not opacity, so selection and highlight
+       marks stay visible and clickable. Figures still fade as a whole. */
+    #lireader-overlay .lr-para.lr-focus, #lireader-overlay .lr-heading.lr-focus {
+      opacity: 1 !important;
+      color: #1f1f1f !important; -webkit-text-fill-color: #1f1f1f !important;
+    }
+    #lireader-overlay .lr-para.lr-near, #lireader-overlay .lr-heading.lr-near {
+      opacity: 1 !important;
+      color: rgba(31,31,31,.48) !important; -webkit-text-fill-color: rgba(31,31,31,.48) !important;
+    }
+    #lireader-overlay .lr-para.lr-dim, #lireader-overlay .lr-heading.lr-dim {
+      opacity: 1 !important;
+      color: rgba(31,31,31,.22) !important; -webkit-text-fill-color: rgba(31,31,31,.22) !important;
+    }
+    #lireader-overlay .lr-figure.lr-focus, #lireader-overlay .lr-math.lr-focus { opacity: 1 !important; }
+    #lireader-overlay .lr-figure.lr-near, #lireader-overlay .lr-math.lr-near { opacity: .6 !important; }
+    #lireader-overlay .lr-figure.lr-dim, #lireader-overlay .lr-math.lr-dim { opacity: .28 !important; }
     /* ---- Selection bar ---- */
     #lireader-overlay .lr-selection-bar {
       position: fixed; display: none; align-items: center; gap: 6px; background: #fff;
@@ -167,7 +208,15 @@
       width: 22px; height: 22px; border-radius: 4px; padding: 0; border: 1px solid #bbb;
     }
     #lireader-overlay .lr-sep { width: 1px; height: 22px; background: #e0e0e0; }
-    #lireader-overlay mark.lr-hl { color: inherit; }
+    #lireader-overlay mark.lr-hl,
+    #lireader-overlay .lr-para.lr-dim mark.lr-hl,
+    #lireader-overlay .lr-para.lr-near mark.lr-hl,
+    #lireader-overlay .lr-heading.lr-dim mark.lr-hl,
+    #lireader-overlay .lr-heading.lr-near mark.lr-hl {
+      background-color: var(--lr-hl, #ffe08a) !important;
+      color: #1f1f1f !important; -webkit-text-fill-color: #1f1f1f !important;
+      opacity: 1 !important;
+    }
     /* ---- Lookup card (dictionary / Wikipedia / translate) ---- */
     #lireader-overlay .lr-card {
       position: fixed; display: none; width: 380px; max-width: 90vw; max-height: 62vh;
@@ -359,60 +408,229 @@
   // ---------------------------------------------------------------------------
   // Article extraction (Readability-lite)
   // ---------------------------------------------------------------------------
-  const NOISE_SELECTOR =
-    "script,style,nav,footer,aside,header,form,button,svg,iframe,figure,noscript," +
-    "select,textarea,img,video,audio,input,ins";
+  const NOISE_SELECTOR = [
+    "script", "style", "noscript", "iframe", "form", "button", "input", "select", "textarea",
+    "nav", "footer", "[role='navigation']", "[role='banner']", "[role='contentinfo']",
+    ".ref-list", ".references", "#references", ".bibliography", ".citation-list",
+    ".related-articles", ".recommended-articles", ".further-reading", ".related-articles-list",
+    ".article-tools", ".social-share", ".share-buttons", ".metrics", ".author-information",
+  ].join(",");
 
   const BLOCK_TAGS = new Set([
     "P", "DIV", "SECTION", "ARTICLE", "LI", "BLOCKQUOTE", "UL", "OL", "TABLE",
-    "PRE", "H1", "H2", "H3", "H4", "H5", "H6",
+    "PRE", "H1", "H2", "H3", "H4", "H5", "H6", "FIGURE", "PICTURE",
   ]);
 
-  function extractImg(el) {
-    let img = null, container = null;
-    if (el.tagName === "IMG") { img = el; }
-    else { img = el.querySelector("img"); container = el; }
-    if (!img) return null;
-    let src = img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("src") || "";
-    if (!src && img.getAttribute("srcset")) {
-      const cands = img.getAttribute("srcset").split(",");
-      const best = cands[cands.length - 1].trim().split(/\s+/)[0];
-      if (best) src = best;
+  // Publisher full-text containers. Several sections that share a selector
+  // (Wiley, PMC) are grouped and scored together.
+  const BODY_SELECTORS = [
+    "[itemprop='articleBody']",
+    "#body", "div.Body", ".article__body", "#bodymatter",
+    "div.c-article-body", ".c-article-body", "section.ArticleBody",
+    ".article-body", "#article-body", "div.article-body",
+    "section.article-section__content", "#article__content",
+    ".hlFld-Fulltext", "#pnlArticleContent", ".JournalFullText",
+    ".tsec", "#mc", "#articleBody", ".article__sections", ".ArticleBody",
+    "#html-body", ".html-body", "#html-content",
+    ".fulltext-view", "#fulltext",
+    ".ltx_page_content", "article.ltx_document",
+    "#articleContent", ".article_content", ".article-content", ".document-content",
+    "section.body", ".j-body", ".article-text", ".article-fulltext",
+    "#article-fulltext", ".widget-ArticleFulltext", ".NLM_sec",
+    ".article-section__content",
+  ];
+
+  const LAZY_ATTRS = [
+    "data-src", "data-original", "data-original-src", "data-lazy-src", "data-lazy",
+    "data-full-src", "data-full", "data-large", "data-large-src", "data-zoom-src",
+    "data-high-res-src", "data-hi-res-src", "data-hires", "data-href", "data-url",
+    "data-image", "data-actualsrc",
+  ];
+
+  function looksLikeImageUrl(url) {
+    return /\.(png|jpe?g|gif|webp|svg|bmp|tiff?)($|[?#])/i.test(url) ||
+      /[?&](format|ext)=(png|jpe?g|webp)/i.test(url);
+  }
+
+  function bestSrcsetUrl(srcset) {
+    let best = "", bestW = -1;
+    for (const part of String(srcset || "").split(",")) {
+      const bits = part.trim().split(/\s+/);
+      if (!bits[0] || /^data:/i.test(bits[0])) continue;
+      const desc = bits[1] || "";
+      let w = 100;
+      if (/^\d+(\.\d+)?w$/i.test(desc)) w = parseFloat(desc);
+      else if (/^\d+(\.\d+)?x$/i.test(desc)) w = parseFloat(desc) * 1600;
+      if (w >= bestW) { bestW = w; best = bits[0]; }
     }
-    if (!src || /^(data:|about:blank)/i.test(src)) return null;
-    const fig = (container || img).closest ? (container || img).closest("figure") : null;
-    const capEl = fig ? fig.querySelector("figcaption") : null;
-    const caption = capEl ? capEl.innerText.trim() : "";
-    return { type: "img", src, alt: img.getAttribute("alt") || "", caption };
+    return best;
+  }
+
+  function isJunkImage(url, alt, img) {
+    const blob = ((url || "") + " " + (alt || "")).toLowerCase();
+    if (/(\/|\b)(logo|icon|sprite|badge|avatar|spinner|placeholder|pixel|tracking|favicon)s?(\/|\b|\.)/.test(blob)) return true;
+    const w = img ? parseInt(img.getAttribute("width") || "0", 10) : 0;
+    const h = img ? parseInt(img.getAttribute("height") || "0", 10) : 0;
+    if (w && h && w <= 40 && h <= 40) return true;
+    if (/^data:image\/gif/i.test(url || "") && (url || "").length < 800) return true;
+    return false;
+  }
+
+  function imageCandidates(img, scope) {
+    if (!img) return [];
+    const urls = [];
+    const push = (u) => {
+      if (!u) return;
+      const v = String(u).trim();
+      if (!v || /^blob:/i.test(v)) return;
+      if (/^data:/i.test(v)) {
+        if (/^data:image\/(?:png|jpe?g|webp)/i.test(v) && v.length > 1500) urls.push(v);
+        return;
+      }
+      urls.push(v);
+    };
+    const sources = [];
+    const picture = img.closest && img.closest("picture");
+    if (picture) picture.querySelectorAll("source").forEach((s) => sources.push(s));
+    sources.push(img);
+    for (const el of sources) {
+      push(bestSrcsetUrl(el.getAttribute("srcset") || el.getAttribute("data-srcset") || ""));
+    }
+    for (const attr of LAZY_ATTRS) push(img.getAttribute(attr));
+    const box = scope || (img.closest && (img.closest("figure") || img.parentElement)) || img;
+    if (box && box.querySelectorAll) {
+      box.querySelectorAll("a[href]").forEach((a) => {
+        const href = a.getAttribute("href") || "";
+        if (looksLikeImageUrl(href)) push(href);
+      });
+    }
+    push(img.getAttribute("src"));
+    const seen = new Set();
+    const unique = [];
+    for (const u of urls) {
+      if (seen.has(u)) continue;
+      seen.add(u);
+      unique.push(u);
+    }
+    unique.sort((a, b) => {
+      const aj = /thumb|thumbnail|\/small\/|preview|icon/i.test(a) ? 1 : 0;
+      const bj = /thumb|thumbnail|\/small\/|preview|icon/i.test(b) ? 1 : 0;
+      return aj - bj;
+    });
+    return unique;
+  }
+
+  function pickImageUrl(img, scope) {
+    const list = imageCandidates(img, scope);
+    return list.length ? list[0] : "";
+  }
+
+  function styleBackgroundUrl(el) {
+    const style = (el && el.getAttribute && el.getAttribute("style")) || "";
+    const m = style.match(/url\(\s*(['"]?)([^"')]+)\1\s*\)/i);
+    return m ? m[2] : "";
+  }
+
+  function backgroundImageUrl(el) {
+    if (!el || el.nodeType !== 1) return "";
+    const own = styleBackgroundUrl(el);
+    if (own && !/^data:/i.test(own)) return own;
+    if (!el.querySelectorAll) return "";
+    const nodes = el.querySelectorAll("[style*='url(']");
+    for (const n of nodes) {
+      const u = styleBackgroundUrl(n);
+      if (u && !/^data:/i.test(u)) return u;
+    }
+    return "";
+  }
+
+  function extractImg(el) {
+    const imgEls = el.tagName === "IMG" ? [el] : Array.from(el.querySelectorAll("img"));
+    const images = [];
+    const seen = new Set();
+    for (const img of imgEls) {
+      const alts = imageCandidates(img, el).filter((src) => !isJunkImage(src, img.getAttribute("alt") || "", img));
+      const src = alts[0];
+      if (!src || seen.has(src)) continue;
+      seen.add(src);
+      images.push({ src, alt: img.getAttribute("alt") || "", alts });
+    }
+    if (!images.length) {
+      const bg = backgroundImageUrl(el);
+      if (bg && !isJunkImage(bg, "", null)) images.push({ src: bg, alt: "" });
+    }
+    if (!images.length) return null;
+    const capEl = el.querySelector && (
+      el.querySelector("figcaption") ||
+      el.querySelector(".caption, .figure-caption, .figcaption, .c-article-figure__caption")
+    );
+    const caption = capEl ? (capEl.innerText || capEl.textContent || "").trim() : "";
+    return { type: "img", src: images[0].src, alt: images[0].alt, images, caption };
+  }
+
+  function nodeText(el) {
+    const visible = (el.innerText || "").replace(/\s+/g, " ").trim();
+    if (visible) return visible;
+    return (el.textContent || "").replace(/\s+/g, " ").trim();
+  }
+
+  function isFigureLike(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.tagName === "IMG" || el.tagName === "PICTURE" || el.tagName === "FIGURE") return true;
+    if (!el.querySelector || !el.querySelector("img")) {
+      return !!backgroundImageUrl(el) && /figure|graphic|illustration/i.test((el.className || "") + " " + (el.id || ""));
+    }
+    const idc = ((el.className || "") + " " + (el.id || "")).toString();
+    if (!/figure|fig\b|graphic|illustration|image-panel/i.test(idc)) return false;
+    if (el.querySelectorAll("p").length > 2 && nodeText(el).length > 900) return false;
+    return true;
+  }
+
+  function isMathBlock(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.tagName === "MATH") return true;
+    const c = (el.className || "").toString();
+    if (/katex-display|MathJax|mjx-container/.test(c)) return true;
+    if (/\bformula\b|display-math|equation/i.test(c) && el.querySelector("math, .katex, mjx-container, img")) return true;
+    return false;
   }
 
   function collectBlocks(root) {
     const out = [];
-    function isImg(el) {
-      return el.tagName === "IMG" || el.tagName === "PICTURE" || el.tagName === "FIGURE";
-    }
     function walk(el) {
-      if (el.nodeType !== 1) return;
-      if (isImg(el)) {
+      if (!el || el.nodeType !== 1) return;
+      if (isFigureLike(el)) {
         const im = extractImg(el);
-        if (im) out.push(im);
+        if (im) { out.push(im); return; }
+        if (el.querySelector && el.querySelector("svg")) {
+          out.push({ type: "math", html: el.outerHTML, display: true });
+          return;
+        }
+        if (el.tagName === "FIGURE" || el.tagName === "PICTURE" || el.tagName === "IMG") return;
+      }
+      if (el.tagName === "SVG" && el.querySelector("path, text")) {
+        out.push({ type: "math", html: el.outerHTML, display: true });
         return;
       }
-      if (el.tagName === "MATH") {
-        out.push({ type: "math", html: el.outerHTML, display: el.getAttribute("display") === "block" });
+      if (isMathBlock(el) && el.tagName !== "P") {
+        out.push({ type: "math", html: el.outerHTML, display: true });
         return;
       }
-      const text = (el.innerText || "").trim();
-      if (!text) return;
       const tag = el.tagName;
+      const text = nodeText(el);
+      if (!text && tag !== "TABLE" && tag !== "PRE") return;
       if (/^H[1-6]$/.test(tag)) {
         out.push({ type: "h", level: Number(tag[1]), text, html: el.innerHTML });
         return;
       }
-      const kids = Array.from(el.children);
-      const hasBlockChild = kids.some((c) => BLOCK_TAGS.has(c.tagName) || isImg(c));
+      if (tag === "TABLE" || tag === "PRE" || tag === "BLOCKQUOTE") {
+        out.push({ type: "p", text, html: el.outerHTML });
+        return;
+      }
+      const kids = Array.from(el.children).filter((c) => c.nodeType === 1);
+      const hasBlockChild = kids.some((c) => BLOCK_TAGS.has(c.tagName) || isFigureLike(c));
       if (!hasBlockChild) {
-        out.push({ type: "p", text, html: el.innerHTML });
+        if (text) out.push({ type: "p", text, html: el.innerHTML });
         return;
       }
       kids.forEach(walk);
@@ -421,84 +639,271 @@
     return out;
   }
 
-  // Keep only the content between the "Abstract" heading and the "References"
-  // heading (exclusive of References). Papers reliably have both, so this is a
-  // safe way to drop front matter and the citation list.
+  function normHeading(text) {
+    return String(text || "")
+      .replace(/\s+/g, " ")
+      .replace(/^\d+(\.\d+)*[\s.:)\-]*/, "")
+      .trim();
+  }
+
+  function isStartHeading(text) {
+    const t = normHeading(text);
+    if (t.length > 48) return false;
+    return /^(abstract|summary|synopsis|precis)$/i.test(t) || /^(摘要|概要|文摘)$/.test(t);
+  }
+
+  function isEndHeading(text) {
+    const t = normHeading(text);
+    if (t.length > 72) return false;
+    return /^(references|reference list|bibliography|literature cited|works cited|cited literature|notes and references|references and notes)$/i.test(t) ||
+      /^(参考文献|引用文献|相关文章|推荐阅读)$/.test(t) ||
+      /^(related articles|recommended articles|similar articles)$/i.test(t);
+  }
+
+  // Keep Abstract → just before References. A "reference" prefix match used to
+  // cut the paper at headings like "Reference frames"; only real section
+  // titles count, and only after the article has actually started.
   function trimToAbstractReference(blocks) {
-    const norm = (b) => (b.type === "h" && b.text ? b.text.trim().toLowerCase() : "");
-    let start = blocks.findIndex((b) => norm(b).startsWith("abstract"));
-    let end = blocks.findIndex((b) => norm(b).startsWith("reference"));
-    if (start === -1) start = 0;
-    if (end === -1) end = blocks.length;
-    if (end < start) end = start;
+    let start = 0;
+    let end = blocks.length;
+    const earlyLimit = Math.max(8, Math.floor(blocks.length * 0.25));
+    for (let i = 0; i < blocks.length; i++) {
+      if (blocks[i].type !== "h") continue;
+      const raw = blocks[i].text || "";
+      if (start === 0 && i <= earlyLimit && isStartHeading(raw)) start = i;
+      if (i > start + 2 && i > Math.max(4, blocks.length * 0.12) && isEndHeading(raw)) {
+        end = i;
+        break;
+      }
+    }
+    if (end < start) end = blocks.length;
     return blocks.slice(start, end);
   }
 
   function hasAbstractHeading(blocks) {
-    return blocks.some((b) => b.type === "h" && /^abstract/i.test(b.text.trim()));
+    return blocks.some((b) => b.type === "h" && isStartHeading(b.text || ""));
+  }
+
+  function findAbstractElement() {
+    const sels = [
+      "#abstract", "#Abs1", "#abs001", "#abstracts", "#abstract-1",
+      "section.abstract", "[role='doc-abstract']", ".article-abstract",
+      ".JournalAbstract", "section[data-title='Abstract']", "#ab-abstract",
+    ];
+    for (const sel of sels) {
+      let el = null;
+      try { el = document.querySelector(sel); } catch (e) { el = null; }
+      if (el && !inReader(el) && nodeText(el).length > 80) return el;
+    }
+    const heads = Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6"));
+    const h = heads.find((x) => !inReader(x) && isStartHeading(x.innerText || x.textContent || ""));
+    if (!h) return null;
+    const box = h.closest("section, .abstract, #abstract") || h.parentElement;
+    return box && nodeText(box).length > 80 ? box : null;
   }
 
   function extractAbstractFromOriginal() {
-    let abs = document.querySelector('[id*="abstract" i], [class*="abstract" i], [id*="Abs1"], [class*="Abs1"]');
-    if (!abs) {
-      const heads = Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6"));
-      const h = heads.find((x) => /^abstract$/i.test(x.innerText.trim()));
-      abs = h ? h.parentElement : null;
-    }
+    const abs = findAbstractElement();
     if (!abs) return [];
     const clone = abs.cloneNode(true);
-    clone.querySelectorAll("script,style,nav,sup,sub,svg,img,button,a").forEach((n) => n.remove());
-    const text = (clone.innerText || "").trim().replace(/^abstract\s*:?\s*/i, "").trim();
+    clone.querySelectorAll("script,style,nav,sup,sub,svg,img,button").forEach((n) => n.remove());
+    const text = nodeText(clone).replace(/^(abstract|summary|摘要|概要)\s*:?\s*/i, "").trim();
     if (!text) return [];
-    const paras = text.split(/\n{2,}/).map((s) => s.trim()).filter(Boolean).slice(0, 6);
+    const paras = text.split(/\n{2,}|\n/).map((s) => s.trim()).filter((s) => s.length > 40).slice(0, 8);
     return paras.map((t) => ({ type: "p", text: t, html: escapeHtml(t) }));
+  }
+
+  function unhideTree(root) {
+    const nodes = [root].concat(Array.from(root.querySelectorAll("[hidden], [style]")));
+    for (const el of nodes) {
+      if (!el || el.nodeType !== 1) continue;
+      el.removeAttribute("hidden");
+      el.removeAttribute("aria-hidden");
+      const s = el.getAttribute("style");
+      if (!s) continue;
+      if (/display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0/i.test(s)) {
+        const next = s
+          .replace(/display\s*:\s*none\s*;?/gi, "")
+          .replace(/visibility\s*:\s*hidden\s*;?/gi, "")
+          .replace(/opacity\s*:\s*0(?:\.0+)?\s*;?/gi, "");
+        if (next.trim()) el.setAttribute("style", next);
+        else el.removeAttribute("style");
+      }
+    }
+  }
+
+  function cleanNode(el) {
+    const clone = el.cloneNode(true);
+    clone.querySelectorAll(NOISE_SELECTOR).forEach((n) => n.remove());
+    clone.querySelectorAll("header").forEach((h) => {
+      const idc = ((h.className || "") + " " + (h.id || "")).toString();
+      if (h.querySelector("nav") || /site|page|banner|journal-header|topbar/i.test(idc)) h.remove();
+    });
+    unhideTree(clone);
+    return clone;
+  }
+
+  function paragraphChars(el) {
+    let n = 0;
+    el.querySelectorAll("p").forEach((p) => { n += nodeText(p).length; });
+    if (n < 200) n = Math.max(n, nodeText(el).length);
+    return n;
+  }
+
+  function scoreElements(els) {
+    let chars = 0, imgs = 0, heads = 0, links = 0;
+    for (const el of els) {
+      chars += paragraphChars(el);
+      imgs += el.querySelectorAll("img, figure").length;
+      heads += el.querySelectorAll("h1,h2,h3,h4,h5,h6").length;
+      links += el.querySelectorAll("a").length;
+    }
+    const linkPenalty = chars > 0 ? Math.min(chars * 0.45, links * 25) : links * 25;
+    return chars + imgs * 280 + heads * 40 - linkPenalty;
+  }
+
+  function findBestRootGroup() {
+    const seen = new Set();
+    const groups = [];
+    function addGroup(els) {
+      const uniq = [];
+      for (const el of els) {
+        if (!el || seen.has(el)) continue;
+        if (uniq.some((u) => u.contains(el) || el.contains(u))) continue;
+        uniq.push(el);
+      }
+      if (!uniq.length) return;
+      uniq.forEach((el) => seen.add(el));
+      groups.push(uniq);
+    }
+    for (const sel of BODY_SELECTORS) {
+      let els = [];
+      try { els = Array.from(document.querySelectorAll(sel)); } catch (e) { els = []; }
+      els = els.filter((el) => !inReader(el) && nodeText(el).length > 180);
+      if (!els.length) continue;
+      const disjoint = els.filter((el) => !els.some((other) => other !== el && other.contains(el)));
+      if (disjoint.length > 1) addGroup(disjoint);
+      else disjoint.forEach((el) => addGroup([el]));
+    }
+    Array.from(document.querySelectorAll("article, main, [role='main']")).forEach((el) => {
+      if (!inReader(el) && nodeText(el).length > 180) addGroup([el]);
+    });
+    let best = null;
+    let bestScore = 700;
+    for (const group of groups) {
+      const score = scoreElements(group);
+      if (score > bestScore) { bestScore = score; best = group; }
+    }
+    return best;
+  }
+
+  function materializeGroup(group) {
+    const holder = document.createElement("div");
+    const abs = findAbstractElement();
+    const coversAbs = abs && group.some((el) => el === abs || el.contains(abs) || abs.contains(el));
+    const bodyText = group.map((el) => nodeText(el)).join(" ").replace(/\s+/g, " ").toLowerCase();
+    const absText = abs ? nodeText(abs).replace(/\s+/g, " ").trim() : "";
+    const absKey = absText.replace(/^(abstract|summary|摘要|概要)\s*:?\s*/i, "").slice(0, 80).toLowerCase();
+    const absInBody = absKey.length > 40 && bodyText.includes(absKey);
+    if (abs && !coversAbs && !absInBody) holder.appendChild(cleanNode(abs));
+    for (const el of group) {
+      if (abs && el === abs) continue;
+      holder.appendChild(cleanNode(el));
+    }
+    return holder;
+  }
+
+  function richness(blocks) {
+    let chars = 0, imgs = 0, paras = 0;
+    for (const b of blocks) {
+      if (b.type === "p" || b.type === "h") chars += (b.text || "").length;
+      if (b.type === "img") imgs += (b.images && b.images.length) || 1;
+      if (b.type === "p") paras += 1;
+    }
+    return { chars, imgs, paras, score: chars + imgs * 450 + paras * 20 };
+  }
+
+  function mergeMissingImages(blocks, donor) {
+    if (!donor) return blocks;
+    if (blocks.some((b) => b.type === "img")) return blocks;
+    const imgs = donor.filter((b) => b.type === "img");
+    if (!imgs.length) return blocks;
+    const out = blocks.slice();
+    for (const img of imgs) {
+      const cap = (img.caption || img.alt || "").replace(/\s+/g, " ").trim().slice(0, 48).toLowerCase();
+      let at = out.length;
+      if (cap.length > 8) {
+        const found = out.findIndex((b) => (b.text || "").replace(/\s+/g, " ").toLowerCase().includes(cap));
+        if (found >= 0) at = found;
+      }
+      out.splice(at, 0, img);
+    }
+    return out;
+  }
+
+  function inReader(el) {
+    return !!(el && el.closest && el.closest("#lireader-overlay"));
+  }
+
+  function readerFreeDocument() {
+    const clone = document.cloneNode(true);
+    clone.querySelectorAll("#lireader-overlay, #lireader-style").forEach((n) => n.remove());
+    return clone;
+  }
+
+  function readabilityBlocks() {
+    if (typeof Readability === "undefined") return { title: "", blocks: [] };
+    try {
+      const article = new Readability(readerFreeDocument(), { charThreshold: 280 }).parse();
+      if (!article || !article.content) return { title: "", blocks: [] };
+      const holder = document.createElement("div");
+      holder.innerHTML = article.content;
+      unhideTree(holder);
+      return { title: article.title || "", blocks: collectBlocks(holder) };
+    } catch (e) {
+      return { title: "", blocks: [] };
+    }
   }
 
   function extractArticle() {
     const h1 = document.querySelector("h1");
-    let title = (h1 && h1.innerText.trim()) || document.title || "Untitled";
+    let title = (h1 && (h1.innerText || h1.textContent || "").trim()) || document.title || "Untitled";
 
-    let blocks = [];
-    // Prefer Mozilla Readability (the Firefox Reader View / Simpread engine)
-    // when available — it filters promotional and boilerplate content far
-    // better than a naive densest-text heuristic.
-    try {
-      if (typeof Readability !== "undefined") {
-        const article = new Readability(document.cloneNode(true), { charThreshold: 500 }).parse();
-        if (article && article.content) {
-          if (article.title) title = article.title;
-          const holder = document.createElement("div");
-          holder.innerHTML = article.content;
-          blocks = collectBlocks(holder);
-        }
+    let domBlocks = [];
+    const group = findBestRootGroup();
+    if (group) domBlocks = collectBlocks(materializeGroup(group));
+
+    const readable = readabilityBlocks();
+    if (readable.title) title = readable.title;
+
+    const domR = richness(domBlocks);
+    const rdR = richness(readable.blocks);
+    let blocks;
+    if (domR.paras >= 2 && (domR.chars >= 500 || domR.imgs > 0) &&
+        (domR.score + (domR.imgs > rdR.imgs ? 400 : 0) >= rdR.score * 0.82)) {
+      blocks = domBlocks;
+      if (rdR.chars > domR.chars * 1.35 && rdR.chars > 1200) {
+        blocks = mergeMissingImages(readable.blocks, domBlocks);
       }
-    } catch (e) { /* fall through to the heuristic below */ }
-
-    // Fallback: densest-text heuristic for pages Readability can't handle.
-    if (blocks.length < 2) {
-      const clone = document.body.cloneNode(true);
-      clone.querySelectorAll(NOISE_SELECTOR).forEach((n) => n.remove());
-      let best = null;
-      let bestScore = -1;
-      clone.querySelectorAll("article,main,section,div").forEach((el) => {
-        const txt = (el.innerText || "").trim();
-        const score = txt.length + 60 * el.querySelectorAll("p").length;
-        if (score > bestScore) { bestScore = score; best = el; }
-      });
-      blocks = collectBlocks(best || clone);
+    } else if (rdR.paras >= 1 && rdR.chars >= domR.chars) {
+      blocks = mergeMissingImages(readable.blocks, domBlocks);
+    } else {
+      blocks = domBlocks.length ? domBlocks : readable.blocks;
     }
 
-    // Drop a leading heading that duplicates the article title.
     if (blocks[0] && blocks[0].type === "h" &&
         blocks[0].text.trim().toLowerCase() === title.trim().toLowerCase()) {
       blocks.shift();
     }
-    // If the abstract was dropped (no "Abstract" heading and the body starts
-    // with a section heading), recover it from the original page.
-    if (blocks.length && blocks[0].type === "h" && !hasAbstractHeading(blocks)) {
-      const abs = extractAbstractFromOriginal();
-      if (abs.length) {
-        blocks = [{ type: "h", level: 2, text: "Abstract", html: "Abstract" }].concat(abs, blocks);
+    if (blocks.length && !hasAbstractHeading(blocks)) {
+      const firstHead = blocks.findIndex((b) => b.type === "h");
+      if (firstHead === 0) {
+        const abs = extractAbstractFromOriginal();
+        const already = abs.length && blocks.some((b) => b.type === "p" && abs[0].text.slice(0, 48) &&
+          (b.text || "").includes(abs[0].text.slice(0, 48)));
+        if (abs.length && !already) {
+          blocks = [{ type: "h", level: 2, text: "Abstract", html: "Abstract" }].concat(abs, blocks);
+        }
       }
     }
     blocks = trimToAbstractReference(blocks);
@@ -536,6 +941,7 @@
     xsnowIndex: -1,
     xsnowAnchor: -1,
     xsnowSavedIndex: -1,
+    xsnowPinning: false,
     cardType: null,
   };
   let overlay = null;
@@ -626,7 +1032,7 @@
           <span class="lr-label">MS key</span>
           <input type="password" class="lr-input" data-act="msKey" placeholder="Microsoft Translator key">
         </div>
-        <div class="lr-xsnow-hint">XSnow: ←→↑↓ move · Shift select · Enter link · Y/U/I highlight · J bold · K italic · Q/W/E lookup · R bionic · T spotlight · Esc exit</div>
+        <div class="lr-xsnow-hint">XSnow: ←→↑↓ move · Shift select · Enter link · Y/U/I highlight · J bold · K italic · L underline · Q/W/E lookup · R bionic · T spotlight · Esc exit</div>
       </div>
       <div class="lr-reading-line"></div>
       <div class="lr-content"></div>
@@ -636,6 +1042,7 @@
         <button class="lr-btn lr-color" data-edit="hl" data-color="#ffb6d9" title="Highlight pink" style="background:#ffb6d9"></button>
         <span class="lr-sep"></span>
         <button class="lr-btn" data-edit="b" title="Bold">B</button>
+        <button class="lr-btn" data-edit="i" title="Italic">I</button>
         <button class="lr-btn" data-edit="u" title="Underline">U</button>
         <span class="lr-sep"></span>
         <button class="lr-btn" data-lookup="dictionary" title="Dictionary">Dict</button>
@@ -681,14 +1088,27 @@
       }
     });
 
-    overlay.querySelector(".lr-selection-bar").addEventListener("click", (e) => {
+    const selectionBar = overlay.querySelector(".lr-selection-bar");
+    selectionBar.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+    });
+    selectionBar.addEventListener("click", (e) => {
       const edit = e.target.closest("[data-edit]");
       if (edit) { applyEdit(edit.dataset.edit, edit.dataset.color); return; }
       const lookup = e.target.closest("[data-lookup]");
       if (lookup) { hideSelectionBar(); doLookup(lookup.dataset.lookup); }
     });
 
-    content.addEventListener("scroll", updateSpotlight, { passive: true });
+    content.addEventListener("scroll", onContentScroll, { passive: true });
+    window.addEventListener("resize", () => {
+      if (!overlay || overlay.style.display !== "flex") return;
+      if (state.xsnow && state.xsnowWords && state.xsnowIndex >= 0) {
+        state.xsnowPinning = true;
+        pinWordToLine(state.xsnowWords[state.xsnowIndex]);
+        state.xsnowPinning = false;
+      }
+      updateSpotlight();
+    });
     content.addEventListener("mouseup", onSelection);
     content.addEventListener("click", (e) => {
       const a = e.target.closest('a[href^="#"]');
@@ -782,37 +1202,84 @@
         const el = document.createElement("h" + Math.min(b.level + 1, 6));
         el.className = "lr-block lr-heading";
         el.id = ids[hi++];
-        el.innerHTML = state.bionic ? bionicHtml(b.text) : escapeHtml(b.text);
+        el.innerHTML = b.editHtml != null ? b.editHtml : escapeHtml(b.text || "");
+        wrapBracketCitations(el);
+        styleCitationLinks(el);
+        if (state.bionic) bionicize(el);
         frag.appendChild(el);
       } else if (b.type === "img") {
         const fig = document.createElement("figure");
         fig.className = "lr-block lr-figure";
-        const img = document.createElement("img");
-        img.src = resolveUrl(b.src);
-        img.alt = b.alt || "";
-        img.loading = "lazy";
-        fig.appendChild(img);
+        const list = (b.images && b.images.length) ? b.images : [{ src: b.src, alt: b.alt || "" }];
+        for (const im of list) {
+          if (!im || !im.src) continue;
+          const img = document.createElement("img");
+          img.alt = im.alt || b.alt || "";
+          img.decoding = "async";
+          img.referrerPolicy = "no-referrer-when-downgrade";
+          if (im.alts && im.alts.length > 1) img.dataset.lrAlts = im.alts.slice(1).join("\n");
+          img.src = resolveUrl(im.src);
+          fig.appendChild(img);
+        }
         if (b.caption) {
           const cap = document.createElement("figcaption");
           cap.className = "lr-figcaption";
           cap.textContent = b.caption;
           fig.appendChild(cap);
         }
-        frag.appendChild(fig);
+        if (fig.querySelector("img")) frag.appendChild(fig);
       } else if (b.type === "math") {
         const wrap = document.createElement("div");
         wrap.className = "lr-block lr-math" + (b.display ? " lr-math-display" : "");
         wrap.innerHTML = b.html;
         frag.appendChild(wrap);
       } else {
-        const el = document.createElement("p");
+        const html = b.html || escapeHtml(b.text || "");
+        const blockish = /<(table|div|ul|ol|blockquote|pre|figure|math)\b/i.test(html);
+        const el = document.createElement(blockish ? "div" : "p");
         el.className = "lr-block lr-para";
-        renderParagraph(el, b.html || escapeHtml(b.text), state.bionic);
+        renderParagraph(el, html, state.bionic);
         frag.appendChild(el);
       }
     }
     content.appendChild(frag);
+    upgradeReaderImages(content);
     updateSpotlight();
+    refreshXsnowWords();
+  }
+
+  function upgradeReaderImages(root) {
+    root.querySelectorAll("img").forEach((img) => {
+      const scope = img.closest("figure, .lr-para, .lr-heading") || img.parentElement;
+      const prior = (img.dataset.lrAlts || "").split("\n").filter(Boolean);
+      const seen = new Set();
+      const alts = [];
+      for (const src of imageCandidates(img, scope).concat(prior)) {
+        if (!src || seen.has(src) || isJunkImage(src, img.getAttribute("alt") || "", img)) continue;
+        seen.add(src);
+        alts.push(src);
+      }
+      if (!alts.length) {
+        img.remove();
+        return;
+      }
+      img.removeAttribute("class");
+      img.removeAttribute("style");
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
+      LAZY_ATTRS.forEach((attr) => img.removeAttribute(attr));
+      img.dataset.lrAlts = alts.slice(1).join("\n");
+      img.loading = "eager";
+      img.decoding = "async";
+      img.referrerPolicy = "no-referrer-when-downgrade";
+      img.addEventListener("error", () => {
+        const rest = (img.dataset.lrAlts || "").split("\n").filter(Boolean);
+        const next = rest.shift();
+        img.dataset.lrAlts = rest.join("\n");
+        if (next) img.src = resolveUrl(next);
+      });
+      img.src = resolveUrl(alts[0]);
+    });
   }
 
   function applyFont() {
@@ -841,27 +1308,77 @@
     if (inp) inp.value = state.msKey || "";
   }
 
+  function spotlightBlocks() {
+    return Array.from(content.querySelectorAll(".lr-para, .lr-heading, .lr-figure, .lr-math"));
+  }
+
+  function readingLineY() {
+    const line = overlay.querySelector(".lr-reading-line");
+    const box = content.getBoundingClientRect();
+    let y = window.innerHeight * 0.5;
+    const minY = box.top + 28;
+    const maxY = Math.max(minY, box.bottom - 36);
+    if (y < minY) y = minY;
+    if (y > maxY) y = maxY;
+    if (line && line.style.display !== "none") line.style.top = y + "px";
+    return y;
+  }
+
+  function syncReadingLine() {
+    const on = !!(state.spotlight || state.xsnow);
+    const line = overlay.querySelector(".lr-reading-line");
+    if (!line) return;
+    line.style.display = on ? "block" : "none";
+    if (on) readingLineY();
+  }
+
+  function blockFromNode(node) {
+    const el = node && (node.nodeType === 1 ? node : node.parentElement);
+    return el && el.closest ? el.closest(".lr-para, .lr-heading, .lr-figure, .lr-math") : null;
+  }
+
+  function blockIndexAtLine(blocks, lineY) {
+    let best = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < blocks.length; i++) {
+      const r = blocks[i].getBoundingClientRect();
+      if (!r.height) continue;
+      if (r.top <= lineY && r.bottom >= lineY) return i;
+      const dist = r.bottom < lineY ? lineY - r.bottom : r.top - lineY;
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    }
+    return best;
+  }
+
   function updateSpotlight() {
-    if (!overlay) return;
-    const paras = Array.from(content.querySelectorAll(".lr-para"));
-    if (!state.spotlight) {
-      paras.forEach((p) => p.classList.remove("lr-focus", "lr-near", "lr-dim"));
+    if (!overlay || !content) return;
+    const blocks = spotlightBlocks();
+    const active = state.spotlight || state.xsnow;
+    if (!active) {
+      blocks.forEach((p) => p.classList.remove("lr-focus", "lr-near", "lr-dim"));
       return;
     }
-    const lineY = window.innerHeight * 0.5;
+    syncReadingLine();
     let bestIdx = 0;
-    let bestDist = Infinity;
-    paras.forEach((p, i) => {
-      const r = p.getBoundingClientRect();
-      const d = Math.abs(r.top + r.height / 2 - lineY);
-      if (d < bestDist) { bestDist = d; bestIdx = i; }
-    });
-    paras.forEach((p, i) => {
+    if (state.xsnow && state.xsnowWords && state.xsnowIndex >= 0) {
+      const w = state.xsnowWords[state.xsnowIndex];
+      const host = w && (w.block && w.block.isConnected ? w.block : blockFromNode(w.startContainer));
+      const idx = host ? blocks.indexOf(host) : -1;
+      bestIdx = idx >= 0 ? idx : blockIndexAtLine(blocks, readingLineY());
+    } else {
+      bestIdx = blockIndexAtLine(blocks, readingLineY());
+    }
+    blocks.forEach((p, i) => {
       p.classList.remove("lr-focus", "lr-near", "lr-dim");
       if (i === bestIdx) p.classList.add("lr-focus");
       else if (Math.abs(i - bestIdx) === 1) p.classList.add("lr-near");
       else p.classList.add("lr-dim");
     });
+  }
+
+  function onContentScroll() {
+    if (state.xsnow && !state.xsnowPinning) followLineWithWord();
+    updateSpotlight();
   }
 
   // ---------------------------------------------------------------------------
@@ -887,21 +1404,101 @@
     if (overlay) overlay.querySelector(".lr-selection-bar").style.display = "none";
   }
 
+  function editTagFor(kind, color) {
+    if (kind === "hl") {
+      const m = document.createElement("mark");
+      m.className = "lr-hl";
+      m.style.setProperty("--lr-hl", color || "#ffe08a");
+      m.style.backgroundColor = color || "#ffe08a";
+      m.style.color = "inherit";
+      return m;
+    }
+    if (kind === "b") return document.createElement("strong");
+    if (kind === "i") return document.createElement("em");
+    if (kind === "u") return document.createElement("u");
+    return null;
+  }
+
+  function editTagMatches(el, kind) {
+    if (!el || el.nodeType !== 1) return false;
+    if (kind === "hl") return el.tagName === "MARK" && el.classList.contains("lr-hl");
+    if (kind === "b") return el.tagName === "STRONG";
+    if (kind === "i") return el.tagName === "EM";
+    if (kind === "u") return el.tagName === "U";
+    return false;
+  }
+
+  function unwrapElement(el) {
+    const parent = el.parentNode;
+    if (!parent) return;
+    while (el.firstChild) parent.insertBefore(el.firstChild, el);
+    parent.removeChild(el);
+  }
+
+  function wrapperAroundRange(range, kind) {
+    let el = range.commonAncestorContainer;
+    if (!el) return null;
+    if (el.nodeType !== 1) el = el.parentElement;
+    while (el && content && el !== content) {
+      if (editTagMatches(el, kind)) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
   function applyEdit(kind, color) {
     const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) { hideSelectionBar(); return; }
+    if (!sel || sel.isCollapsed || !sel.rangeCount) { hideSelectionBar(); return; }
     const range = sel.getRangeAt(0);
-    let el;
-    if (kind === "hl") {
-      el = document.createElement("mark");
-      el.className = "lr-hl";
-      el.style.backgroundColor = color || "#ffe08a";
-      el.style.color = "inherit";
-    } else if (kind === "b") el = document.createElement("strong");
-    else if (kind === "u") el = document.createElement("u");
-    try { range.surroundContents(el); } catch (err) { /* partial cross-block selection */ }
+    if (!content.contains(range.commonAncestorContainer)) { hideSelectionBar(); return; }
+    const startBlock = blockFromNode(range.startContainer);
+    const endBlock = blockFromNode(range.endContainer);
+    if (!startBlock || startBlock !== endBlock) { hideSelectionBar(); return; }
+    const existing = wrapperAroundRange(range, kind);
+    if (existing) {
+      unwrapElement(existing);
+      if (startBlock.normalize) startBlock.normalize();
+      sel.removeAllRanges();
+      hideSelectionBar();
+      commitReaderEdits();
+      return;
+    }
+    const el = editTagFor(kind, color);
+    if (!el) { hideSelectionBar(); return; }
+    try {
+      const contents = range.extractContents();
+      if (!contents.textContent) { hideSelectionBar(); return; }
+      el.appendChild(contents);
+      range.insertNode(el);
+    } catch (err) { /* selection crossed a block boundary */ }
     sel.removeAllRanges();
     hideSelectionBar();
+    commitReaderEdits();
+  }
+
+  function unwrapBionic(root) {
+    root.querySelectorAll("b.lr-bionic").forEach((node) => {
+      unwrapElement(node);
+    });
+    if (root.normalize) root.normalize();
+  }
+
+  // Write the live paragraphs back into the article model, with bionic
+  // syllables removed, so highlights and other marks survive a re-render.
+  function commitReaderEdits() {
+    if (!content || !state.blocks) return;
+    const nodes = content.querySelectorAll(".lr-heading, .lr-para");
+    let i = 0;
+    for (const block of state.blocks) {
+      if (block.type === "img" || block.type === "math") continue;
+      const el = nodes[i++];
+      if (!el) break;
+      const clone = el.cloneNode(true);
+      unwrapBionic(clone);
+      if (block.type === "h") block.editHtml = clone.innerHTML;
+      else block.html = clone.innerHTML;
+      block.text = clone.textContent || "";
+    }
   }
 
   // ---- XSnow: keyboard-driven word navigation & hotkey actions ----
@@ -910,9 +1507,16 @@
     state.fontSize = Math.max(12, Math.min(32, state.fontSize + delta));
     applyFont();
     saveSettings();
+    if (state.xsnow && state.xsnowWords && state.xsnowIndex >= 0) {
+      state.xsnowPinning = true;
+      pinWordToLine(state.xsnowWords[state.xsnowIndex]);
+      updateSpotlight();
+      state.xsnowPinning = false;
+    }
   }
 
   function toggleBionic() {
+    commitReaderEdits();
     state.bionic = !state.bionic;
     const btn = overlay.querySelector("[data-act='bionic']");
     if (btn) btn.classList.toggle("active", state.bionic);
@@ -923,7 +1527,7 @@
     state.spotlight = !state.spotlight;
     const btn = overlay.querySelector("[data-act='spotlight']");
     if (btn) btn.classList.toggle("active", state.spotlight);
-    overlay.querySelector(".lr-reading-line").style.display = state.spotlight ? "block" : "none";
+    syncReadingLine();
     updateSpotlight();
   }
 
@@ -947,7 +1551,7 @@
   // is treated as transparent so a word is never split by bionic/edits.
   function collectWordRanges(root) {
     const ranges = [];
-    const paras = root.querySelectorAll(".lr-para");
+    const paras = root.querySelectorAll(".lr-para, .lr-heading");
     const blocks = paras.length ? Array.from(paras) : [root];
     const re = /[A-Za-z][A-Za-z'-]*/g;
     for (const block of blocks) {
@@ -975,6 +1579,7 @@
         const eSeg = segAt(segs, e - 1);
         ranges.push({
           text: m[0],
+          block,
           startContainer: sSeg.node,
           startOffset: s - sSeg.start,
           endContainer: eSeg.node,
@@ -986,11 +1591,16 @@
   }
 
   function wordRect(w) {
-    const r = document.createRange();
-    r.setStart(w.startContainer, w.startOffset);
-    r.setEnd(w.endContainer, w.endOffset);
-    const rects = r.getClientRects();
-    return rects.length ? rects[0] : null;
+    if (!w || !w.startContainer || !w.endContainer) return null;
+    try {
+      const r = document.createRange();
+      r.setStart(w.startContainer, w.startOffset);
+      r.setEnd(w.endContainer, w.endOffset);
+      const rects = r.getClientRects();
+      return rects.length ? rects[0] : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   function firstVisibleWordIndex() {
@@ -1030,31 +1640,101 @@
 
   function selectRange(a, b) {
     if (!state.xsnowWords || !state.xsnowWords.length) return;
+    const top = content.scrollTop;
     const lo = Math.min(a, b), hi = Math.max(a, b);
     const wl = state.xsnowWords[lo], wr = state.xsnowWords[hi];
+    if (!wl || !wr || !wl.startContainer || !wr.endContainer) return;
     const sel = window.getSelection();
     sel.removeAllRanges();
-    const r = document.createRange();
-    r.setStart(wl.startContainer, wl.startOffset);
-    r.setEnd(wr.endContainer, wr.endOffset);
-    sel.addRange(r);
+    try {
+      const r = document.createRange();
+      r.setStart(wl.startContainer, wl.startOffset);
+      r.setEnd(wr.endContainer, wr.endOffset);
+      sel.addRange(r);
+    } catch (e) { /* range detached after a re-render */ }
+    if (content.scrollTop !== top) content.scrollTop = top;
   }
 
-  function scrollWordToReadingLine(w) {
-    const r = wordRect(w);
-    if (!r) return;
-    const lineY = window.innerHeight * 0.5;
-    const delta = (r.top + r.height / 2) - lineY;
-    content.scrollBy({ top: delta, behavior: "smooth" });
+  function pinWordToLine(w) {
+    if (!w) return;
+    syncReadingLine();
+    const rect = wordRect(w);
+    if (!rect || !rect.height) return;
+    const delta = (rect.top + rect.height / 2) - readingLineY();
+    if (Math.abs(delta) < 1.5) return;
+    content.scrollTop += delta;
   }
 
+  function wordIndexNearestLine() {
+    if (!state.xsnowWords || !state.xsnowWords.length) return -1;
+    const y = readingLineY();
+    const cur = state.xsnowWords[state.xsnowIndex];
+    const curRect = cur ? wordRect(cur) : null;
+    const anchorX = curRect ? curRect.left + curRect.width / 2 : content.getBoundingClientRect().left + 48;
+    const blocks = spotlightBlocks();
+    const host = blocks[blockIndexAtLine(blocks, y)] || null;
+    function search(filterHost) {
+      let best = -1, bestKey = Infinity;
+      for (let i = 0; i < state.xsnowWords.length; i++) {
+        const w = state.xsnowWords[i];
+        if (filterHost && host && w.block && w.block !== host && !host.contains(w.block)) continue;
+        const r = wordRect(w);
+        if (!r || r.height < 1) continue;
+        const dy = Math.abs((r.top + r.height / 2) - y);
+        const dx = Math.abs((r.left + r.width / 2) - anchorX);
+        const key = dy * 10000 + dx;
+        if (key < bestKey) { bestKey = key; best = i; }
+      }
+      return best;
+    }
+    const hit = host ? search(true) : -1;
+    return hit >= 0 ? hit : search(false);
+  }
+
+  function followLineWithWord() {
+    if (!state.xsnowWords || !state.xsnowWords.length) return;
+    if (state.xsnowAnchor !== state.xsnowIndex) return;
+    const i = wordIndexNearestLine();
+    if (i < 0 || i === state.xsnowIndex) return;
+    state.xsnowIndex = i;
+    state.xsnowAnchor = i;
+    selectRange(i, i);
+  }
+
+  let xsnowPinToken = 0;
   function setXsnowIndex(i, shift) {
     if (!shift) state.xsnowAnchor = i;
     state.xsnowIndex = i;
     const w = state.xsnowWords[i];
     if (!w) return;
+    const token = ++xsnowPinToken;
+    state.xsnowPinning = true;
     selectRange(state.xsnowAnchor, state.xsnowIndex);
-    scrollWordToReadingLine(w);
+    pinWordToLine(w);
+    updateSpotlight();
+    requestAnimationFrame(() => {
+      if (token !== xsnowPinToken) return;
+      const cur = state.xsnowWords && state.xsnowWords[state.xsnowIndex];
+      if (cur) pinWordToLine(cur);
+      updateSpotlight();
+      requestAnimationFrame(() => {
+        if (token === xsnowPinToken) state.xsnowPinning = false;
+      });
+    });
+  }
+
+  function refreshXsnowWords() {
+    if (!state.xsnow) return;
+    const prev = state.xsnowIndex;
+    state.xsnowWords = collectWordRanges(content);
+    if (!state.xsnowWords.length) {
+      state.xsnowIndex = -1;
+      state.xsnowAnchor = -1;
+      return;
+    }
+    state.xsnowIndex = Math.min(Math.max(prev, 0), state.xsnowWords.length - 1);
+    state.xsnowAnchor = Math.min(Math.max(state.xsnowAnchor, 0), state.xsnowWords.length - 1);
+    setXsnowIndex(state.xsnowIndex, state.xsnowAnchor !== state.xsnowIndex);
   }
 
   function moveVertical(dir, shift) {
@@ -1084,6 +1764,7 @@
     if (state.xsnow) { deactivateXSnow(); return; }
     state.xsnow = true;
     setXsnowHint(true);
+    syncReadingLine();
     const btn = overlay.querySelector("[data-act='xsnow']");
     if (btn) btn.classList.add("active");
     state.xsnowWords = collectWordRanges(content);
@@ -1106,37 +1787,39 @@
     state.xsnowIndex = -1;
     state.xsnowAnchor = -1;
     setXsnowHint(false);
+    syncReadingLine();
+    updateSpotlight();
     const btn = overlay.querySelector("[data-act='xsnow']");
     if (btn) btn.classList.remove("active");
     const sel = window.getSelection();
     if (sel) sel.removeAllRanges();
   }
 
-  function highlightWord(color) {
-    if (!state.xsnowWords || !state.xsnowWords.length) return;
-    const lo = Math.min(state.xsnowAnchor, state.xsnowIndex);
-    const hi = Math.max(state.xsnowAnchor, state.xsnowIndex);
-    const wl = state.xsnowWords[lo], wr = state.xsnowWords[hi];
-    const r = document.createRange();
-    r.setStart(wl.startContainer, wl.startOffset);
-    r.setEnd(wr.endContainer, wr.endOffset);
-    const text = r.toString();
-    r.deleteContents();
-    const mark = document.createElement("mark");
-    mark.className = "lr-hl";
-    mark.style.backgroundColor = color;
-    mark.style.color = "inherit";
-    mark.textContent = text;
-    r.insertNode(mark);
-    // The DOM changed — rebuild word ranges and keep the cursor/selection.
-    state.xsnowWords = collectWordRanges(content);
-    state.xsnowIndex = Math.min(state.xsnowIndex, state.xsnowWords.length - 1);
-    state.xsnowAnchor = Math.min(state.xsnowAnchor, state.xsnowWords.length - 1);
-    if (state.xsnowIndex >= 0) selectRange(state.xsnowAnchor, state.xsnowIndex);
+  function wordWrapper(kind, color) {
+    if (kind === "hl") {
+      const m = document.createElement("mark");
+      m.className = "lr-hl";
+      m.style.setProperty("--lr-hl", color);
+      m.style.backgroundColor = color;
+      m.style.color = "inherit";
+      return m;
+    }
+    if (kind === "b") return document.createElement("strong");
+    if (kind === "i") return document.createElement("em");
+    if (kind === "u") return document.createElement("u");
+    return null;
   }
 
-  // Wrap the current selection (single word or Shift-selected range) in a tag.
-  function wrapSelection(tagName) {
+  function wordWrapperMatches(el, kind) {
+    if (!el || el.nodeType !== 1) return false;
+    if (kind === "hl") return el.tagName === "MARK" && el.classList.contains("lr-hl");
+    if (kind === "b") return el.tagName === "STRONG";
+    if (kind === "i") return el.tagName === "EM";
+    if (kind === "u") return el.tagName === "U";
+    return false;
+  }
+
+  function wrapSelectionWith(el) {
     if (!state.xsnowWords || !state.xsnowWords.length) return;
     const lo = Math.min(state.xsnowAnchor, state.xsnowIndex);
     const hi = Math.max(state.xsnowAnchor, state.xsnowIndex);
@@ -1147,9 +1830,9 @@
     const text = r.toString();
     if (!text) return;
     r.deleteContents();
-    const el = document.createElement(tagName);
     el.textContent = text;
     r.insertNode(el);
+    commitReaderEdits();
     // The DOM changed — rebuild word ranges and keep the cursor/selection.
     state.xsnowWords = collectWordRanges(content);
     state.xsnowIndex = Math.min(state.xsnowIndex, state.xsnowWords.length - 1);
@@ -1157,20 +1840,21 @@
     if (state.xsnowIndex >= 0) selectRange(state.xsnowAnchor, state.xsnowIndex);
   }
 
-  function toggleInline(tagName) {
+  function toggleWordEdit(kind, color) {
     const w = state.xsnowWords && state.xsnowWords[state.xsnowIndex];
     if (!w) return;
     const el = w.startContainer.nodeType === 1 ? w.startContainer : w.startContainer.parentElement;
-    // If the current word is already wrapped in this tag, unwrap it (toggle off).
-    if (el && el.tagName === tagName.toUpperCase() && el.textContent.trim() === w.text.trim()) {
+    // Toggle off if the current word is already wrapped in the matching tag.
+    if (el && wordWrapperMatches(el, kind) && el.textContent.trim() === w.text.trim()) {
       el.replaceWith(document.createTextNode(el.textContent));
+      commitReaderEdits();
       state.xsnowWords = collectWordRanges(content);
       state.xsnowIndex = Math.min(state.xsnowIndex, state.xsnowWords.length - 1);
       state.xsnowAnchor = Math.min(state.xsnowAnchor, state.xsnowWords.length - 1);
       if (state.xsnowIndex >= 0) selectRange(state.xsnowAnchor, state.xsnowIndex);
       return;
     }
-    wrapSelection(tagName);
+    wrapSelectionWith(wordWrapper(kind, color));
   }
 
   function lookupWord(type) {
@@ -1228,9 +1912,9 @@
       return;
     }
     const code = e.code || "";
-    if (code === "KeyY") { e.preventDefault(); highlightWord("#ffe08a"); }
-    else if (code === "KeyU") { e.preventDefault(); highlightWord("#aad4ff"); }
-    else if (code === "KeyI") { e.preventDefault(); highlightWord("#ffb6d9"); }
+    if (code === "KeyY") { e.preventDefault(); toggleWordEdit("hl", "#ffe08a"); }
+    else if (code === "KeyU") { e.preventDefault(); toggleWordEdit("hl", "#aad4ff"); }
+    else if (code === "KeyI") { e.preventDefault(); toggleWordEdit("hl", "#ffb6d9"); }
     else if (code === "KeyQ") { e.preventDefault(); toggleLookup("translate"); }
     else if (code === "KeyW") { e.preventDefault(); toggleLookup("wiki"); }
     else if (code === "KeyE") { e.preventDefault(); toggleLookup("dictionary"); }
@@ -1238,8 +1922,9 @@
     else if (code === "KeyD") { e.preventDefault(); setFontSize(1); }
     else if (code === "KeyR") { e.preventDefault(); toggleBionic(); }
     else if (code === "KeyT") { e.preventDefault(); toggleSpotlight(); }
-    else if (code === "KeyJ") { e.preventDefault(); toggleInline("strong"); }
-    else if (code === "KeyK") { e.preventDefault(); toggleInline("em"); }
+    else if (code === "KeyJ") { e.preventDefault(); toggleWordEdit("b"); }
+    else if (code === "KeyK") { e.preventDefault(); toggleWordEdit("i"); }
+    else if (code === "KeyL") { e.preventDefault(); toggleWordEdit("u"); }
   }
 
   // ---- Lookup: dictionary / Wikipedia / translate ----
@@ -1494,40 +2179,72 @@
     const clone = content.cloneNode(true);
     const outlineEl = clone.querySelector(".lr-outline");
     if (outlineEl) outlineEl.remove();
+    clone.querySelectorAll(".lr-focus, .lr-near, .lr-dim").forEach((el) => {
+      el.classList.remove("lr-focus", "lr-near", "lr-dim");
+    });
+    clone.querySelectorAll("img").forEach((img) => {
+      const src = img.getAttribute("src") || "";
+      if (src) img.setAttribute("src", resolveUrl(src));
+      img.setAttribute("referrerpolicy", "no-referrer");
+      img.removeAttribute("srcset");
+      img.removeAttribute("loading");
+    });
     const bodyHTML = clone.innerHTML;
     return `<!doctype html>
 <html><head><meta charset="utf-8"><title>${escapeHtml(state.title)}</title>
 <style>
-  body { font-family: Georgia, 'Times New Roman', serif; color: #111; line-height: 1.65; margin: 2.2rem; }
-  h1.doc-title { font-size: 1.6em; margin-bottom: .4em; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: #111; line-height: 1.65; margin: 0; }
+  h1.doc-title { font-size: 1.6em; margin: 0 0 .4em; }
   .outline { border: 1px solid #bbb; border-radius: 6px; padding: 1rem 1.2rem; margin: 1rem 0 1.6rem; }
   .outline h2 { font-size: 1em; text-transform: uppercase; letter-spacing: .04em; color: #555; margin: 0 0 .5rem; }
-  .outline ol { margin: 0; padding-left: 1.4rem; }
+  .outline ul, .outline ol { margin: 0; padding-left: 1.4rem; }
   .outline a { color: #0645ad; text-decoration: none; }
+  .content h2, .content h3, .content h4, .content h5 { page-break-after: avoid; }
   .content h2 { font-size: 1.25em; margin-top: 1.6em; }
   .content h3 { font-size: 1.1em; margin-top: 1.3em; }
-  .content h4 { font-size: 1em; }
-  .content p { margin: 0 0 1em; }
-  mark { color: inherit; padding: 0 1px; }
+  .content p, .content .lr-para { margin: 0 0 1em; opacity: 1; color: #111; }
+  .content img { max-width: 100%; height: auto; display: block; margin: .6em auto; }
+  .content figure { margin: 1em 0; page-break-inside: avoid; text-align: center; }
+  .content figcaption { font: 12px/1.45 sans-serif; color: #444; text-align: left; }
+  mark { color: inherit; padding: 0 1px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   sup.lr-cite, sub.lr-cite { font-size: .68em; color: #3b6fc0; }
   a.lr-cite-link { color: #3b6fc0; text-decoration: none; }
-  @page { margin: 2cm; }
+  @page { margin: 1.6cm; }
 </style></head>
 <body>
 <h1 class="doc-title">${escapeHtml(state.title)}</h1>
 <div class="outline"><h2>Outline</h2><ol>${items}</ol></div>
 <hr>
 <div class="content">${bodyHTML}</div>
-<script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 150); });<\/script>
 </body></html>`;
   }
 
   function exportPDF() {
-    const w = window.open("", "_blank");
-    if (!w) { alert("Popup blocked. Please allow popups for this site to save the PDF."); return; }
-    w.document.open();
-    w.document.write(buildPrintHTML());
-    w.document.close();
+    const btn = overlay.querySelector("[data-act='export-pdf']");
+    if (btn) btn.disabled = true;
+    let html = "";
+    try { html = buildPrintHTML(); }
+    catch (e) {
+      if (btn) btn.disabled = false;
+      alert("Could not build the PDF document.");
+      return;
+    }
+    const finish = (resp) => {
+      if (btn) btn.disabled = false;
+      const err = chrome.runtime && chrome.runtime.lastError;
+      if (err || !resp || !resp.ok) {
+        alert("Could not open the print tab. Reload the LiReader extension and try again.");
+      }
+    };
+    try {
+      chrome.storage.local.set({ lireaderPrintHTML: html }, () => {
+        if (chrome.runtime.lastError) { finish(null); return; }
+        chrome.runtime.sendMessage({ type: "lireader-print-open" }, finish);
+      });
+    } catch (e) {
+      if (btn) btn.disabled = false;
+      alert("Could not open the print tab. Reload the LiReader extension and try again.");
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1578,7 +2295,7 @@
       o.style.display = "flex";
       o.querySelector("[data-act='bionic']").classList.toggle("active", state.bionic);
       o.querySelector("[data-act='spotlight']").classList.toggle("active", state.spotlight);
-      o.querySelector(".lr-reading-line").style.display = state.spotlight ? "block" : "none";
+      syncReadingLine();
       applyFont();
       applyMargin();
       applySettingsUI();
